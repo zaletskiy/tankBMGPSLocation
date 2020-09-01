@@ -1,0 +1,37 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+
+    <title>The HTML5 Herald</title>
+    <meta name="description" content="The HTML5 Herald">
+    <meta name="author" content="SitePoint">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+
+    <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+
+    <!-- https://cdnjs.com/libraries/sockjs-client -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.1.4/sockjs.min.js"></script>
+    <!-- https://cdnjs.com/libraries/stomp.js/ -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+
+
+</head>
+
+<body>
+<div class="col-md-6">
+    <div class="form-group">
+        <label for="connect">WebSocket connection:</label>
+        <button id="connect" class="btn btn-default" >Connect</button>
+        <button id="disconnect" class="btn btn-default" disabled="disabled">Disconnect
+        </button>
+    </div>
+
+    <ul id="gpsData" class="list-group hidden"></ul>
+</div>
+
+
+<script src="main.js"></script>
+</body>
+</html>
