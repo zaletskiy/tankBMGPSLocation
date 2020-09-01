@@ -1,9 +1,6 @@
 package com.example.tank.bm.location.gps.Service;
 
-import jssc.SerialPort;
-import jssc.SerialPortEvent;
-import jssc.SerialPortEventListener;
-import jssc.SerialPortException;
+import jssc.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
@@ -21,17 +18,26 @@ public class ConnectionService {
         addEventListener();
     }
 
+    public void stop() throws SerialPortException {
+        getPort().removeEventListener();
+        closePort();
+    }
+
     private SerialPort getPort() throws SerialPortException {
-        if (serialPort == null){
+        if (serialPort == null) {
             return initializePort();
         } else {
             return serialPort;
         }
     }
 
+    private String findPort(){
+        return SerialPortList.getPortNames()[0];
+    }
+
 
     private SerialPort initializePort() throws SerialPortException {
-        SerialPort serialPort = new SerialPort("/dev/ttyACM0");
+        SerialPort serialPort = new SerialPort(findPort());
         serialPort.openPort();//Open serial port
         serialPort.setParams(SerialPort.BAUDRATE_9600, SerialPort.DATABITS_8, SerialPort.STOPBITS_1, SerialPort.PARITY_NONE);
         this.serialPort = serialPort;
@@ -47,7 +53,7 @@ public class ConnectionService {
             @Override
             public void serialEvent(SerialPortEvent event) {
 
-                if(event.getEventValue() > 0) {
+                if (event.getEventValue() > 0) {
                     try {
                         byte[] bytes = serialPort.readBytes();
                         String data = parseData(bytes);
@@ -55,8 +61,7 @@ public class ConnectionService {
 
                         System.out.println("JSSC -> initPort() : Received response hexstring: " + data);
                         System.out.println("----------------------------------");
-                    }
-                    catch (SerialPortException ex) {
+                    } catch (SerialPortException ex) {
                         System.out.println("JSSC -> initPort() : Error in receiving string from COM-port: " + ex);
                     }
                 }
@@ -64,50 +69,8 @@ public class ConnectionService {
         });
     }
 
-
-    /*public synchronized String getGpsLiveData() {
-        SerialPort serialPort = new SerialPort("/dev/ttyACM0");
-        try {
-            serialPort.openPort();//Open serial port
-            serialPort.setParams(SerialPort.BAUDRATE_9600, SerialPort.DATABITS_8, SerialPort.STOPBITS_1, SerialPort.PARITY_NONE);
-
-            byte[] bytes = serialPort.readBytes();
-            serialPort.closePort();//Close serial port
-
-            return parseData(bytes);
-        }
-        catch (SerialPortException ex) {
-            System.out.println(ex);
-            return null;
-        }
-    }
-
-    public synchronized void serialEvent(SerialPortEvent serialPortEvent) {
-        if (serialPortEvent.isRXCHAR()) { // if we receive data
-            if (serialPortEvent.getEventValue() > 0) { // if there is some existent data
-                try {
-                    byte[] bytes = this.serialPort.readBytes(); // reading the bytes received on serial port
-                    if (bytes != null) {
-                        for (byte b : bytes) {
-                            this.serialInput.add(b); // adding the bytes to the linked list
-
-                            // *** DEBUGGING *** //
-                            System.out.print(String.format("%X ", b));
-                        }
-                    }
-                } catch (SerialPortException e) {
-                    System.out.println(e);
-                    e.printStackTrace();
-                }
-            }
-        }
-
-    }
-*/
-
-
     private String parseData(byte[] bytes) {
-        if (bytes == null){
+        if (bytes == null) {
             return null;
         }
         StringBuilder sb = new StringBuilder();
@@ -115,11 +78,11 @@ public class ConnectionService {
         String s = new String(bytes);
         String[] rows = s.split("\\r\\n");
         for (String row : rows) {
-            if (row.contains("$GPRMC")){
-                String[] data= row.split(",");
+            if (row.contains("$GPRMC")) {
+                String[] data = row.split(",");
                 if (!StringUtils.isEmpty(data[3]) && !StringUtils.isEmpty(data[5])) {
                     sb.append(data[3]).append(data[5]);
-                }else {
+                } else {
                     sb.append("no data");
                 }
             }

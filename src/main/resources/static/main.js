@@ -17,6 +17,7 @@ function connect() {
 }
 
 function disconnect() {
+    stompClient.send("/app/stop");
     if (stompClient !== null) {
         stompClient.disconnect();
     }
